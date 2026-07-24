@@ -8,8 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-# Upgrade pip and wheel first to avoid vulnerable build tools
-RUN pip install --no-cache-dir --upgrade pip wheel && \
+
+# Upgrade setup tooling to patch Trivy flags (wheel & jaraco.context)
+RUN pip install --no-cache-dir --upgrade pip "wheel>=0.46.2" "jaraco.context>=6.1.0" setuptools && \
     pip install --no-cache-dir --user -r requirements.txt
 
 # Stage 2: Runtime Environment
