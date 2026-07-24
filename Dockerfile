@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
-# Upgrade setup tooling to patch Trivy flags (wheel & jaraco.context)
+# Upgrade setup tools and install application dependencies
 RUN pip install --no-cache-dir --upgrade pip "wheel>=0.46.2" "jaraco.context>=6.1.0" setuptools && \
     pip install --no-cache-dir --user -r requirements.txt
 
@@ -25,6 +25,11 @@ RUN groupadd -g 10001 appuser && \
 # Copy pre-installed Python packages from builder stage
 COPY --from=builder /root/.local /home/appuser/.local
 COPY app/ /app/app/
+
+# Remove system/build metadata files that trigger Trivy base-image flags
+RUN rm -rf /usr/local/lib/python3.11/site-packages/wheel* \
+           /usr/local/lib/python3.11/site-packages/setuptools* \
+           /home/appuser/.local/lib/python3.11/site-packages/wheel*
 
 ENV PATH=/home/appuser/.local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
